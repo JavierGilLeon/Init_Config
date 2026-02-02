@@ -73,6 +73,7 @@ flatpak
 cd /tmp
 brave
 steam
+install_cmake
 install_torrent
 
 cd ~
