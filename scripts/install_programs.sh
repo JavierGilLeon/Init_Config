@@ -56,7 +56,7 @@ sudo make install
 
 #-----------------------------------------------------------------------------
 install_torrent(){
-  git clone git@github.com:qbittorrent/qBittorrent.git torrent
+  git clone https://github.com/qbittorrent/qBittorrent.git torrent
   cd torrent
 
   mkdir -p build && cd build
@@ -65,6 +65,16 @@ install_torrent(){
   make 
 }
 
+#-----------------------------------------------------------------------------
+install_fastfetch(){
+git clone https://github.com/fastfetch-cli/fastfetch.git fastfetch
+cd fastfetch
+mkdir -p build
+cd build
+cmake ..
+cmake --build . --target fastfetch
+
+}
 
 #-----------------------------------------------------------------------------
 basic
@@ -75,6 +85,10 @@ brave
 steam
 install_cmake
 install_torrent
+install_fastfetch
 
 cd ~
 modify_zshrc
+
+clear
+fastfetch
