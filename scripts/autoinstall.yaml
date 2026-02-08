@@ -1,0 +1,13 @@
+#cloud-config
+autoinstall:
+  version: 1
+
+  source:
+    id: ubuntu-desktop-minimal
+
+  locale: en_US.UTF-8
+
+  keyboard:
+    layout: es
+
+  timezone: Europe/Madrid
