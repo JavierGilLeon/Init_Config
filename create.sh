@@ -2,29 +2,55 @@
 
 set -e
 
+
 EFI_SIZE_MB=1024
-RAM_SIZE_KB=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
-RAM_SIZE_MB=$((RAM_SIZE_KB / 1024))
-
-if   [ "$RAM_SIZE_MB" -le 4096 ];  then
-  SWAP_MB=$((RAM_SIZE_MB*2))
-elif [ "$RAM_SIZE_MB" -le 8192 ];  then
-  SWAP_MB=$((RAM_SIZE_MB))
-elif [ "$RAM_SIZE_MB" -le 16384 ]; then
-  SWAP_MB=8192
-else
-  SWAP_MB=4096
-fi
+SWAP_SIZE_MB=16384
 
 
-cat > partition.dump << EOF
-label: gpt
-start=2048, size=${EFI_SIZE_MB}M, type=uefi
-size=${SWAP_MB}M, type=swap
-type=linux
+make_partition(){
+  cat > partition.dump << EOF
+  label: gpt
+  start=2048, size=$1M, type=uefi, name="EFI System Partition"
+  size=$2M, type=swap, name="Linux Swap"
+  type=linux, name="Linux FileSystem"
 EOF
 
-if   [ -b /dev/sda ]; then
+  sfdisk --no-act "$DISK" < partition.dump
+
+  read -p "Write changes to disk? [y/n]: " yn
+
+  case $yn in
+    [Yy]*) sfdisk "$DISK" < partition.dump ;;
+
+    [Nn]*)
+	 read -p "EFI size in MB: " EFI_SIZE_MB
+	 read -p "SWAP size in MB: " SWAP_SIZE_MB
+	 make_partition $EFI_SIZE_MB $SWAP_SIZE_MB ;;
+  esac
+}
+
+mount_partition(){
+  EFI=$(sfdisk -l "$DISK" | grep -i "efi")
+  EFI_DISK=$(echo "$EFI" | awk '{print $1}')
+
+  SWAP=$(sfdisk -l "$DISK" | grep -i "swap")
+  SWAP_DISK=$(echo "$SWAP" | awk '{print $1}')
+
+  LINUX=$(sfdisk -l "$DISK" | grep -i "filesystem")
+  LINUX_DISK=$(echo "$LINUX" | awk '{print $1}')
+  
+  mkfs.ext4 "$LINUX_DISK"
+  mkswap "$SWAP_DISK"
+  mkfs.fat -F 32 "$EFI_DISK"
+
+  mount "$LINUX_DISK" /mnt
+  mount --mkdir "$EFI_DISK" /mnt/boot
+  swapon "$SWAP_DISK"
+
+}
+
+
+if   [ -b /dev/sda ]; then # -b -> file exists and is a block special file
   DISK=/dev/sda
 elif [ -b /dev/vda ]; then
   DISK=/dev/vda
@@ -33,4 +59,5 @@ else
   exit 1
 fi
 
-sfdisk "$DISK" < partition.dump
+make_partition $EFI_SIZE_MB $SWAP_SIZE_MB
+mount_partition
