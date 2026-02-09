@@ -27,6 +27,10 @@ EOF
 	 read -p "SWAP size in MB: " SWAP_SIZE_MB
 	 make_partition $EFI_SIZE_MB $SWAP_SIZE_MB ;;
   esac
+
+  if [ "$yn" == "" ]; then
+    sfdisk "$DISK" < partition.dump
+  fi
 }
 
 mount_partition(){
