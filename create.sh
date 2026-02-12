@@ -9,9 +9,10 @@ SWAP_SIZE_MB=16384
 first_steps(){
   read -p "User: " user_id
   echo
-  read -p -s "User password: " user_passwd
+  read -s -p "User password: " user_passwd
+  echo
 
-  echo "$user_password" | useradd "$user_id"
+  echo "$user_passwd" | useradd "$user_id"
 }
 
 make_partition(){
@@ -74,9 +75,24 @@ configure_system(){
   # Set Time Zone
   ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
   hwclock --systohc
+  timedatectl set-timezone Europe/Madrid
 
+  # Generate locales
+  sed -i '168s/^#//' /etc/locale.gen
+  locale-gen
+
+  echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+
+  # Keyboard Layout
+  echo "KEYMAP=es" >> /etc/vconsole.conf
+
+  # Network Configuration
+  sed -i 's/^archiso/laptop-hp/' /etc/hostname
 }
 
+install_bootloader(){
+
+}
 
 if   [ -b /dev/sda ]; then # -b -> file exists and is a block special file
   DISK=/dev/sda
@@ -91,4 +107,5 @@ first_steps
 make_partition $EFI_SIZE_MB $SWAP_SIZE_MB
 mount_partition
 install_essential_packages
-# configure_system
+configure_system
+install_bootloader
