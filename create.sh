@@ -2,20 +2,6 @@
 
 set -e
 
-if [ -d /sys/firmware/efi/efivars ]; then
-  echo "EFI detected, instalation is about to begin"
-else
-  echo "EFI not detected, please start in UEFI mode"
-  exit 1
-fi
-
-EFI_SIZE_MB=1024
-SWAP_SIZE_MB=16384
-
-read -p "User: " user_id
-echo
-read -s -p "User password: " user_passwd
-echo
 
 
 make_partition(){
@@ -31,6 +17,9 @@ EOF
   read -p "Write changes to disk? [y/n]: " yn
 
   case $yn in
+  echo "-------------------------------------------"
+  echo "Making partitions..."
+  echo "-------------------------------------------"
     [Yy]*) sfdisk "$DISK" < partition.dump ;;
 
     [Nn]*)
@@ -40,7 +29,10 @@ EOF
   esac
 
   if [ "$yn" == "" ]; then
+  echo "-------------------------------------------"
+  echo "Making partitions..."
     sfdisk "$DISK" < partition.dump
+  echo "-------------------------------------------"
   fi
 }
 
@@ -52,9 +44,24 @@ mount_partition(){
     PREFIX="${DISK}"
   fi
 
+
   EFI_DISK="${PREFIX}1"
   SWAP_DISK="${PREFIX}2"
   LINUX_DISK="${PREFIX}3"
+
+  echo "-------------------------------------------"
+  echo "Mounting EFI in ${EFI_DISK}..."
+  echo "-------------------------------------------"
+  echo
+  echo "-------------------------------------------"
+  echo "Mounting SWAP in ${SWAP_DISK}..."
+  echo "-------------------------------------------"
+  echo
+  echo "-------------------------------------------"
+  echo "Mounting Linxux FileSystem in ${LINUX_DISK}..."
+  echo "-------------------------------------------"
+
+
   
   mkfs.ext4 "$LINUX_DISK"
   mkswap "$SWAP_DISK"
@@ -109,6 +116,25 @@ configure_system(){
 EOF
 }
 
+if [ -d /sys/firmware/efi/efivars ]; then
+  echo "-------------------------------------------"
+  echo "EFI detected, instalation is about to begin"
+  echo "-------------------------------------------"
+else
+  echo "-------------------------------------------"
+  echo "EFI not detected, please start in UEFI mode"
+  echo "-------------------------------------------"
+  exit 1
+fi
+
+EFI_SIZE_MB=1024
+SWAP_SIZE_MB=16384
+
+read -p "User: " user_id
+echo
+read -s -p "User password: " user_passwd
+echo
+
 if   [ -b /dev/sda ]; then # -b -> file exists and is a block special file
   DISK=/dev/sda
 elif [ -b /dev/vda ]; then
@@ -116,9 +142,16 @@ elif [ -b /dev/vda ]; then
 elif [ -b /dev/nvme0n1 ]; then
   DISK=/dev/nvme0n1
 else
+  echo "-------------------------------------------"
   echo "Disk not found"
+  echo "-------------------------------------------"
   exit 1
 fi
+
+echo "-------------------------------------------"
+echo "Disk detected: ${DISK}"
+echo "-------------------------------------------"
+
 
 make_partition $EFI_SIZE_MB $SWAP_SIZE_MB
 mount_partition
