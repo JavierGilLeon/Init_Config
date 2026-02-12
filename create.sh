@@ -128,8 +128,8 @@ configure_system(){
   git clone https://github.com/JavierGilLeon/Init_Config.git "\$HOME/init-conf"
 
   chown -R "$user_id:$user_id" "\$HOME/init-conf"
-  chmod +x "\$HOME/init-conf/create.sh"
-  echo "\$HOME/init-conf/create.sh" >> /home/$user_id/.bashrc
+  chmod +x "\$HOME/init-conf/post-install.sh"
+  echo "\$HOME/init-conf/post-install.sh" >> /home/$user_id/.bashrc
 
 EOF
 }
