@@ -17,10 +17,11 @@ EOF
   read -p "Write changes to disk? [y/n]: " yn
 
   case $yn in
-  echo "-------------------------------------------"
-  echo "Making partitions..."
-  echo "-------------------------------------------"
-    [Yy]*) sfdisk "$DISK" < partition.dump ;;
+    [Yy]*)
+      echo "-------------------------------------------"
+      echo "Making partitions..."
+      echo "-------------------------------------------"
+      sfdisk "$DISK" < partition.dump ;;
 
     [Nn]*)
 	 read -p "EFI size in MB: " EFI_SIZE_MB
