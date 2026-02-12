@@ -91,7 +91,7 @@ configure_system(){
 }
 
 install_bootloader(){
-
+echo
 }
 
 if   [ -b /dev/sda ]; then # -b -> file exists and is a block special file
