@@ -62,7 +62,7 @@ mount_partition(){
 }
 
 install_essential_packages(){
-  pacstrap -K /mnt base linux linux-firmware
+  pacstrap -K /mnt base linux linux-firmware vim neovim git
 }
 
 configure_system(){
@@ -78,16 +78,16 @@ configure_system(){
   timedatectl set-timezone Europe/Madrid
 
   # Generate locales
-  sed -i '168s/^#//' /etc/locale.gen
+  sed -i 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
   locale-gen
 
-  echo "LANG=en_US.UTF-8" >> /etc/locale.conf
+  echo "LANG=en_US.UTF-8" > /etc/locale.conf
 
   # Keyboard Layout
-  echo "KEYMAP=es" >> /etc/vconsole.conf
+  echo "KEYMAP=es" > /etc/vconsole.conf
 
   # Network Configuration
-  sed -i 's/^archiso/laptop-hp/' /etc/hostname
+  echo "laptop-hp" > /etc/hostname
 }
 
 install_bootloader(){
