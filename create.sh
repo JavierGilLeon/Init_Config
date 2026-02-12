@@ -119,7 +119,8 @@ configure_system(){
   echo "Downloading Post-Installation script..."
   echo "-------------------------------------------"
 
-  git clone https://github.com/JavierGilLeon/Init_Config.git init-conf
+
+  git clone https://github.com/JavierGilLeon/Init_Config.git /home/$user_id/init-conf
 
   chown -R $user_id:$user_id /home/$user_id/init-conf
   sudo chmod +x init-conf/create.sh
