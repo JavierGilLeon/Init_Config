@@ -124,3 +124,4 @@ make_partition $EFI_SIZE_MB $SWAP_SIZE_MB
 mount_partition
 install_essential_packages
 configure_system
+reboot
