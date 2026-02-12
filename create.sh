@@ -79,8 +79,13 @@ install_essential_packages(){
 }
 
 configure_system(){
+
+  # Clone Post-Install Script
+  git clone https://github.com/JavierGilLeon/Init_Config.git /mnt/home/$user_id/init-conf
+
   # Generate FSTAB file
   genfstab -U /mnt >> /mnt/etc/fstab
+
 
   # Chroot into the new system
   arch-chroot /mnt /bin/bash << EOF
@@ -118,9 +123,6 @@ configure_system(){
   echo "-------------------------------------------"
   echo "Downloading Post-Installation script..."
   echo "-------------------------------------------"
-
-
-  git clone https://github.com/JavierGilLeon/Init_Config.git /home/$user_id/init-conf
 
   chown -R $user_id:$user_id /home/$user_id/init-conf
   sudo chmod +x init-conf/create.sh
