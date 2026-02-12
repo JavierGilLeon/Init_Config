@@ -6,6 +6,20 @@ set -e
 EFI_SIZE_MB=1024
 SWAP_SIZE_MB=16384
 
+first_steps(){
+  read -p "User: " user_id
+  echo
+  read -p -s "User password: " user_passwd
+
+  echo "$user_password" | useradd "$user_id"
+
+  if [ $? -eq 0]; then
+    echo "User $user_id added successfully"
+  else
+    echo "Failed to add user $user_id"
+    first_steps()
+  fi
+}
 
 make_partition(){
   cat > partition.dump << EOF
@@ -53,6 +67,14 @@ mount_partition(){
 
 }
 
+install_essential_packages(){
+  pacstrap -K /mnt base linux linux-firmware
+}
+
+configure_system(){
+  genfstab -U /mnt >> /mnt/etc/fstab
+}
+
 
 if   [ -b /dev/sda ]; then # -b -> file exists and is a block special file
   DISK=/dev/sda
@@ -65,3 +87,5 @@ fi
 
 make_partition $EFI_SIZE_MB $SWAP_SIZE_MB
 mount_partition
+install_essential_packages
+configure_system
