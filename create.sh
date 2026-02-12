@@ -113,8 +113,23 @@ configure_system(){
   grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
   grub-mkconfig -o /boot/grub/grub.cfg
 
+  # Copy post-install script into new system 
+  echo "-------------------------------------------"
+  echo "Downloading Post-Installation script..."
+  echo "-------------------------------------------"
+
+  git clone https://github.com/JavierGilLeon/Init_Config.git init-conf
+
+  chown -R $user_id:$user_id /home/$user_id/init-conf
+  sudo chmod +x init-conf/create.sh
+  echo "/home/$user_id/init-conf/create.sh" >> .bashrc
+
 EOF
 }
+
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
+#-----------------------------------------------------------------
 
 if [ -d /sys/firmware/efi/efivars ]; then
   echo "-------------------------------------------"
