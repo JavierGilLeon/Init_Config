@@ -12,13 +12,6 @@ first_steps(){
   read -p -s "User password: " user_passwd
 
   echo "$user_password" | useradd "$user_id"
-
-  if [ $? -eq 0]; then
-    echo "User $user_id added successfully"
-  else
-    echo "Failed to add user $user_id"
-    first_steps()
-  fi
 }
 
 make_partition(){
@@ -72,7 +65,16 @@ install_essential_packages(){
 }
 
 configure_system(){
+  # Generate FSTAB file
   genfstab -U /mnt >> /mnt/etc/fstab
+
+  # Chroot into the new system
+  arch-chroot /mnt
+
+  # Set Time Zone
+  ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+  hwclock --systohc
+
 }
 
 
@@ -85,7 +87,8 @@ else
   exit 1
 fi
 
+first_steps
 make_partition $EFI_SIZE_MB $SWAP_SIZE_MB
 mount_partition
 install_essential_packages
-configure_system
+# configure_system
