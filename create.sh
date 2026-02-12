@@ -6,14 +6,11 @@ set -e
 EFI_SIZE_MB=1024
 SWAP_SIZE_MB=16384
 
-first_steps(){
-  read -p "User: " user_id
-  echo
-  read -s -p "User password: " user_passwd
-  echo
+read -p "User: " user_id
+echo
+read -s -p "User password: " user_passwd
+echo
 
-  echo "$user_passwd" | useradd "$user_id"
-}
 
 make_partition(){
   cat > partition.dump << EOF
@@ -42,14 +39,16 @@ EOF
 }
 
 mount_partition(){
-  EFI=$(sfdisk -l "$DISK" | grep -i "efi")
-  EFI_DISK=$(echo "$EFI" | awk '{print $1}')
 
-  SWAP=$(sfdisk -l "$DISK" | grep -i "swap")
-  SWAP_DISK=$(echo "$SWAP" | awk '{print $1}')
+  if [[ "$DISK" == *"nvme"* ]]; then
+    PREFIX="${DISK}p"
+  else
+    PREFIX="${DISK}"
+  fi
 
-  LINUX=$(sfdisk -l "$DISK" | grep -i "filesystem")
-  LINUX_DISK=$(echo "$LINUX" | awk '{print $1}')
+  EFI_DISK="${PREFIX}1"
+  SWAP_DISK="${PREFIX}2"
+  LINUX_DISK="${PREFIX}3"
   
   mkfs.ext4 "$LINUX_DISK"
   mkswap "$SWAP_DISK"
@@ -62,7 +61,7 @@ mount_partition(){
 }
 
 install_essential_packages(){
-  pacstrap -K /mnt base linux linux-firmware vim neovim git
+  pacstrap -K /mnt base linux linux-firmware vim neovim git sudo networkmanager
 }
 
 configure_system(){
@@ -70,12 +69,11 @@ configure_system(){
   genfstab -U /mnt >> /mnt/etc/fstab
 
   # Chroot into the new system
-  arch-chroot /mnt
+  arch-chroot /mnt /bin/bash << EOF
 
   # Set Time Zone
   ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
   hwclock --systohc
-  timedatectl set-timezone Europe/Madrid
 
   # Generate locales
   sed -i 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
@@ -88,24 +86,30 @@ configure_system(){
 
   # Network Configuration
   echo "laptop-hp" > /etc/hostname
-}
+  systemctl enable --now NetworkManager
 
-install_bootloader(){
-echo
+  # Create User
+  useradd -m -G wheel -s /bin/bash "$user_id"
+  echo "$user_id:$user_passwd" | chpasswd
+
+  # Enable wheel group to sudo
+  sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+
+EOF
 }
 
 if   [ -b /dev/sda ]; then # -b -> file exists and is a block special file
   DISK=/dev/sda
 elif [ -b /dev/vda ]; then
   DISK=/dev/vda
+elif [ -b /dev/nvme0n1 ]; then
+  DISK=/dev/nvme0n1
 else
   echo "Disk not found"
   exit 1
 fi
 
-first_steps
 make_partition $EFI_SIZE_MB $SWAP_SIZE_MB
 mount_partition
 install_essential_packages
 configure_system
-install_bootloader
