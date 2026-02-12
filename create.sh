@@ -2,6 +2,12 @@
 
 set -e
 
+if [ -d /sys/firmware/efi/efivars ]; then
+  echo "EFI detected, instalation is about to begin"
+else
+  echo "EFI not detected, please start in UEFI mode"
+  exit 1
+fi
 
 EFI_SIZE_MB=1024
 SWAP_SIZE_MB=16384
@@ -61,7 +67,7 @@ mount_partition(){
 }
 
 install_essential_packages(){
-  pacstrap -K /mnt base linux linux-firmware vim neovim git sudo networkmanager
+  pacstrap -K /mnt base linux linux-firmware vim neovim git sudo networkmanager grub efibootmgr
 }
 
 configure_system(){
