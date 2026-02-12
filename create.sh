@@ -86,7 +86,7 @@ configure_system(){
 
   # Network Configuration
   echo "laptop-hp" > /etc/hostname
-  systemctl enable --now NetworkManager
+  systemctl enable NetworkManager
 
   # Create User
   useradd -m -G wheel -s /bin/bash "$user_id"
