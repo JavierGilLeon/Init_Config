@@ -97,9 +97,14 @@ configure_system(){
   # Create User
   useradd -m -G wheel -s /bin/bash "$user_id"
   echo "$user_id:$user_passwd" | chpasswd
+  echo "root:$user_passwd" | chpasswd
 
   # Enable wheel group to sudo
   sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+
+  # Install bootloader (GRUB)
+  grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+  grub-mkconfig -o /boot/grub/grub.cfg
 
 EOF
 }
