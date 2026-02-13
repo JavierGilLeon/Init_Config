@@ -21,3 +21,11 @@ yay -S ninja gcc cmake meson libxcb xcb-proto xcb-util xcb-util-keysyms libxfixe
 git clone --recursive https://github.com/hyprwm/Hyprland
 cd Hyprland
 make all && sudo make install
+
+echo "-------------------------------------"
+echo "Hyprland Successfully installed"
+echo "-------------------------------------"
+
+HOME=/home/$USER
+sed -i "\#$HOME/init-conf/post-install.sh#d" ~/.bashrc
+
