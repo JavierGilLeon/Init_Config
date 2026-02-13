@@ -136,6 +136,7 @@ configure_system(){
   # Enable systemd services
   systemctl enable NetworkManager
   systemctl enable sshd
+  systemctl enable bluetooth
 
 EOF
 }
