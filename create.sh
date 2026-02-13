@@ -1,8 +1,6 @@
 #!/bin/bash
 
-set -e
-
-
+set -e # Stops if something fails
 
 make_partition(){
   cat > partition.dump << EOF
@@ -35,112 +33,6 @@ EOF
     sfdisk "$DISK" < partition.dump
   echo "-------------------------------------------"
   fi
-}
-
-mount_partition(){
-
-  if [[ "$DISK" == *"nvme"* ]]; then
-    PREFIX="${DISK}p"
-  else
-    PREFIX="${DISK}"
-  fi
-
-
-  EFI_DISK="${PREFIX}1"
-  SWAP_DISK="${PREFIX}2"
-  LINUX_DISK="${PREFIX}3"
-
-  echo "-------------------------------------------"
-  echo "Mounting EFI in ${EFI_DISK}..."
-  echo "-------------------------------------------"
-  echo
-  echo "-------------------------------------------"
-  echo "Mounting SWAP in ${SWAP_DISK}..."
-  echo "-------------------------------------------"
-  echo
-  echo "-------------------------------------------"
-  echo "Mounting Linxux FileSystem in ${LINUX_DISK}..."
-  echo "-------------------------------------------"
-
-
-  
-  mkfs.ext4 "$LINUX_DISK"
-  mkswap "$SWAP_DISK"
-  mkfs.fat -F 32 "$EFI_DISK"
-
-  mount "$LINUX_DISK" /mnt
-  mount --mkdir "$EFI_DISK" /mnt/boot
-  swapon "$SWAP_DISK"
-
-}
-
-install_essential_packages(){
-  pacstrap -K /mnt base linux linux-firmware 
-}
-
-configure_system(){
-
-  # Clone Post-Install Script
-
-  # Generate FSTAB file
-  genfstab -U /mnt >> /mnt/etc/fstab
-
-
-  # Chroot into the new system
-  arch-chroot /mnt /bin/bash << EOF
-
-  # Install packages
-  pacman -S --noconfirm vim neovim git sudo networkmanager grub efibootmgr man openssh bluez bluez-utils fakeroot debugedit make 
-
-  # Set Time Zone
-  ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
-  hwclock --systohc
-
-  # Generate locales
-  sed -i 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
-  locale-gen
-
-  echo "LANG=en_US.UTF-8" > /etc/locale.conf
-
-  # Keyboard Layout
-  echo "KEYMAP=es" > /etc/vconsole.conf
-
-  # Hostname
-  echo "laptop-hp" > /etc/hostname
-
-  # Create User
-  useradd -m -G wheel -s /bin/bash "$user_id"
-  echo "$user_id:$user_passwd" | chpasswd
-  echo "root:$user_passwd" | chpasswd
-
-  # Enable wheel group to sudo
-  sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
-
-  # Install bootloader (GRUB)
-  grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
-  grub-mkconfig -o /boot/grub/grub.cfg
-
-  # Enable systemd services
-  systemctl enable NetworkManager
-  systemctl enable sshd
-  systemctl enable bluetooth
-
-  # Install yay
-
-  # Copy post-install script into new system 
-  echo "-------------------------------------------"
-  echo "Downloading Post-Installation script..."
-  echo "-------------------------------------------"
-
-  HOME="/home/$user_id"
-
-  git clone https://github.com/JavierGilLeon/Init_Config.git "\$HOME/init-conf"
-
-  chown -R "$user_id:$user_id" "\$HOME/init-conf"
-  chmod +x "\$HOME/init-conf/post-install.sh"
-  echo "\$HOME/init-conf/post-install.sh" >> /home/$user_id/.bashrc
-
-EOF
 }
 
 #-----------------------------------------------------------------
@@ -184,8 +76,106 @@ echo "Disk detected: ${DISK}"
 echo "-------------------------------------------"
 
 
-make_partition $EFI_SIZE_MB $SWAP_SIZE_MB
-mount_partition
-install_essential_packages
-configure_system
-reboot
+make_partition
+
+if [[ "$DISK" == *"nvme"* ]]; then
+  PREFIX="${DISK}p"
+else
+  PREFIX="${DISK}"
+fi
+
+
+EFI_DISK="${PREFIX}1"
+SWAP_DISK="${PREFIX}2"
+LINUX_DISK="${PREFIX}3"
+
+echo "-------------------------------------------"
+echo "Mounting EFI in ${EFI_DISK}..."
+echo "-------------------------------------------"
+echo
+echo "-------------------------------------------"
+echo "Mounting SWAP in ${SWAP_DISK}..."
+echo "-------------------------------------------"
+echo
+echo "-------------------------------------------"
+echo "Mounting Linxux FileSystem in ${LINUX_DISK}..."
+echo "-------------------------------------------"
+
+
+
+mkfs.ext4 "$LINUX_DISK"
+mkswap "$SWAP_DISK"
+mkfs.fat -F 32 "$EFI_DISK"
+
+mount "$LINUX_DISK" /mnt
+mount --mkdir "$EFI_DISK" /mnt/boot
+swapon "$SWAP_DISK"
+
+
+pacstrap -K /mnt base linux linux-firmware 
+
+
+
+# Generate FSTAB file
+genfstab -U /mnt >> /mnt/etc/fstab
+
+
+# Chroot into the new system
+arch-chroot /mnt /bin/bash << EOF
+
+# Install packages
+pacman -S --noconfirm $(grep -v '^#' pre-install-pkg.txt)
+
+# Set Time Zone
+ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
+hwclock --systohc
+
+# Generate locales
+sed -i 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+locale-gen
+
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+# Keyboard Layout
+echo "KEYMAP=es" > /etc/vconsole.conf
+
+# Hostname
+echo "laptop-hp" > /etc/hostname
+
+# Create User
+useradd -m -G wheel -s /bin/bash "$user_id"
+echo "$user_id:$user_passwd" | chpasswd
+echo "root:$user_passwd" | chpasswd
+
+# Enable wheel group to sudo
+sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+
+# Install bootloader (GRUB)
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
+grub-mkconfig -o /boot/grub/grub.cfg
+
+# Enable systemd services
+systemctl enable NetworkManager
+systemctl enable sshd
+systemctl enable bluetooth
+
+# Install yay
+
+# Copy post-install script into new system 
+echo "-------------------------------------------"
+echo "Downloading Post-Installation script..."
+echo "-------------------------------------------"
+
+HOME="/home/$user_id"
+
+git clone https://github.com/JavierGilLeon/Init_Config.git "\$HOME/init-conf"
+
+chown -R "$user_id:$user_id" "\$HOME/init-conf"
+chmod +x "\$HOME/init-conf/post-install.sh"
+echo "\$HOME/init-conf/post-install.sh" >> /home/$user_id/.bashrc
+
+EOF
+
+
+
+

@@ -1,14 +1,7 @@
-
-# Base Binaries
+# Base Packages
 sudo
-networkmanager
 man
-openssh
 git
-
-# Bluetooth
-bluez
-bluez-utils
 
 # Bootloader
 grub
@@ -19,6 +12,17 @@ gcc
 make
 fakeroot
 debugedit
+
+# Network
+networkmanager
+openssh
+
+# Bluetooth
+bluez
+bluez-utils
+
+# Audio
+pipewire
 
 # Text Editors
 vim
