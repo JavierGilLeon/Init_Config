@@ -90,7 +90,7 @@ configure_system(){
   arch-chroot /mnt /bin/bash << EOF
 
   # Install packages
-  yes | pacman -S vim neovim git sudo networkmanager grub efibootmgr man openssh bluez bluez-utils 
+  pacman -S --noconfirm vim neovim git sudo networkmanager grub efibootmgr man openssh bluez bluez-utils 
 
   # Set Time Zone
   ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
