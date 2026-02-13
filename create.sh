@@ -75,7 +75,7 @@ mount_partition(){
 }
 
 install_essential_packages(){
-  pacstrap -K /mnt base linux linux-firmware vim neovim git sudo networkmanager grub efibootmgr
+  pacstrap -K /mnt base linux linux-firmware 
 }
 
 configure_system(){
@@ -88,6 +88,9 @@ configure_system(){
 
   # Chroot into the new system
   arch-chroot /mnt /bin/bash << EOF
+
+  # Install packages
+  yes | pacman -S vim neovim git sudo networkmanager grub efibootmgr man openssh bluez bluez-utils 
 
   # Set Time Zone
   ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
@@ -102,9 +105,8 @@ configure_system(){
   # Keyboard Layout
   echo "KEYMAP=es" > /etc/vconsole.conf
 
-  # Network Configuration
+  # Hostname
   echo "laptop-hp" > /etc/hostname
-  systemctl enable NetworkManager
 
   # Create User
   useradd -m -G wheel -s /bin/bash "$user_id"
@@ -130,6 +132,10 @@ configure_system(){
   chown -R "$user_id:$user_id" "\$HOME/init-conf"
   chmod +x "\$HOME/init-conf/post-install.sh"
   echo "\$HOME/init-conf/post-install.sh" >> /home/$user_id/.bashrc
+
+  # Enable systemd services
+  systemctl enable NetworkManager
+  systemctl enable sshd
 
 EOF
 }
