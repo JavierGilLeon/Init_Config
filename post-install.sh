@@ -26,6 +26,18 @@ echo "-------------------------------------"
 echo "Hyprland Successfully installed"
 echo "-------------------------------------"
 
-HOME=/home/$USER
+
+echo "-------------------------------------"
+echo "Installing SDDM greeter..."
+echo "-------------------------------------"
+
+sudo pacman -S --noconfirm qt5-base qt5-declarative qt5-tools sddm
+
+
+echo "-------------------------------------"
+echo "SDDM greeter successfully installed"
+echo "-------------------------------------"
+
 sed -i "\#$HOME/init-conf/post-install.sh#d" ~/.bashrc
+
 
