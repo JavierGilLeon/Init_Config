@@ -76,7 +76,7 @@ echo "Disk detected: ${DISK}"
 echo "-------------------------------------------"
 
 
-make_partition
+make_partition $EFI_SIZE_MB $SWAP_SIZE_MB
 
 if [[ "$DISK" == *"nvme"* ]]; then
   PREFIX="${DISK}p"
@@ -112,7 +112,7 @@ mount --mkdir "$EFI_DISK" /mnt/boot
 swapon "$SWAP_DISK"
 
 
-pacstrap -K /mnt base linux linux-firmware 
+pacstrap -K /mnt base linux linux-firmware
 
 
 
@@ -122,15 +122,6 @@ genfstab -U /mnt >> /mnt/etc/fstab
 
 # Chroot into the new system
 arch-chroot /mnt /bin/bash << EOF
-
-# Clone Install repository
-HOME="/home/$user_id"
-git clone https://github.com/JavierGilLeon/Init_Config.git "\$HOME/init-conf"
-chown -R "$user_id:$user_id" "\$HOME/init-conf"
-
-# Install packages
-pacman -S --noconfirm $(grep -v '^#' pre-install-pkg.txt)
-
 # Set Time Zone
 ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
 hwclock --systohc
@@ -158,6 +149,14 @@ sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
 # Install bootloader (GRUB)
 grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
 grub-mkconfig -o /boot/grub/grub.cfg
+
+# Clone Install repository
+HOME="/home/$user_id"
+git clone https://github.com/JavierGilLeon/Init_Config.git "\$HOME/init-conf"
+chown -R "$user_id:$user_id" "\$HOME/init-conf"
+
+# Install packages
+pacman -S --noconfirm \$(grep -v '^#' \$HOME/init-conf/pre-install-pkg.txt)
 
 # Enable systemd services
 systemctl enable NetworkManager
