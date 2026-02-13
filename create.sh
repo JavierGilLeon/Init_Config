@@ -123,6 +123,11 @@ genfstab -U /mnt >> /mnt/etc/fstab
 # Chroot into the new system
 arch-chroot /mnt /bin/bash << EOF
 
+# Clone Install repository
+HOME="/home/$user_id"
+git clone https://github.com/JavierGilLeon/Init_Config.git "\$HOME/init-conf"
+chown -R "$user_id:$user_id" "\$HOME/init-conf"
+
 # Install packages
 pacman -S --noconfirm $(grep -v '^#' pre-install-pkg.txt)
 
@@ -161,16 +166,6 @@ systemctl enable bluetooth
 
 # Install yay
 
-# Copy post-install script into new system 
-echo "-------------------------------------------"
-echo "Downloading Post-Installation script..."
-echo "-------------------------------------------"
-
-HOME="/home/$user_id"
-
-git clone https://github.com/JavierGilLeon/Init_Config.git "\$HOME/init-conf"
-
-chown -R "$user_id:$user_id" "\$HOME/init-conf"
 chmod +x "\$HOME/init-conf/post-install.sh"
 echo "\$HOME/init-conf/post-install.sh" >> /home/$user_id/.bashrc
 
