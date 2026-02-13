@@ -112,7 +112,7 @@ mount --mkdir "$EFI_DISK" /mnt/boot
 swapon "$SWAP_DISK"
 
 
-pacstrap -K /mnt base linux linux-firmware
+pacstrap -K /mnt base linux linux-firmware git
 
 
 

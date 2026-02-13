@@ -1,7 +1,6 @@
 # Base Packages
 sudo
 man
-git
 
 # Bootloader
 grub
