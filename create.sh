@@ -112,7 +112,7 @@ mount --mkdir "$EFI_DISK" /mnt/boot
 swapon "$SWAP_DISK"
 
 
-pacstrap -K /mnt base linux linux-firmware git
+pacstrap -K /mnt base base-devel linux linux-firmware git grub efibootmgr sudo networkmanager
 
 
 

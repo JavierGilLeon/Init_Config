@@ -1,19 +1,8 @@
 # Base Packages
-sudo
 man
 
-# Bootloader
-grub
-efibootmgr
-
-# Compilers
-gcc
-make
-fakeroot
-debugedit
 
 # Network
-networkmanager
 openssh
 
 # Bluetooth
