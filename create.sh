@@ -90,7 +90,7 @@ configure_system(){
   arch-chroot /mnt /bin/bash << EOF
 
   # Install packages
-  pacman -S --noconfirm vim neovim git sudo networkmanager grub efibootmgr man openssh bluez bluez-utils 
+  pacman -S --noconfirm vim neovim git sudo networkmanager grub efibootmgr man openssh bluez bluez-utils fakeroot debugedit make 
 
   # Set Time Zone
   ln -sf /usr/share/zoneinfo/Europe/Madrid /etc/localtime
@@ -120,6 +120,13 @@ configure_system(){
   grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB
   grub-mkconfig -o /boot/grub/grub.cfg
 
+  # Enable systemd services
+  systemctl enable NetworkManager
+  systemctl enable sshd
+  systemctl enable bluetooth
+
+  # Install yay
+
   # Copy post-install script into new system 
   echo "-------------------------------------------"
   echo "Downloading Post-Installation script..."
@@ -132,11 +139,6 @@ configure_system(){
   chown -R "$user_id:$user_id" "\$HOME/init-conf"
   chmod +x "\$HOME/init-conf/post-install.sh"
   echo "\$HOME/init-conf/post-install.sh" >> /home/$user_id/.bashrc
-
-  # Enable systemd services
-  systemctl enable NetworkManager
-  systemctl enable sshd
-  systemctl enable bluetooth
 
 EOF
 }

@@ -1,0 +1,26 @@
+
+# Base Binaries
+sudo
+networkmanager
+man
+openssh
+git
+
+# Bluetooth
+bluez
+bluez-utils
+
+# Bootloader
+grub
+efibootmgr
+
+# Compilers
+gcc
+make
+fakeroot
+debugedit
+
+# Text Editors
+vim
+neovim
+
