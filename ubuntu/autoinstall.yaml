@@ -54,10 +54,12 @@ autoinstall:
         flag: boot
 
       - type: format
+        id: format-efi
         volume: boot
         fstype: fat32
       
       - type: mount
+        id: mount-efi
         device: boot
         path: /boot/efi
       
@@ -68,10 +70,12 @@ autoinstall:
         size: -1
 
       - type: format
+        id: format-root
         volume: root
         fstype: ext4
       
       - type: mount
+        id: mount-root
         device: root
         path: /
 
