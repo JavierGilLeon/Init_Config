@@ -1,0 +1,78 @@
+#cloud-config
+autoinstall:
+  version: 1
+
+  source:
+    id: kubuntu-desktop-minimal
+
+
+
+  locale: en_US.UTF-8
+  keyboard:
+    layout: es
+  timezone: Europe/Madrid
+
+  network:
+    version: 2
+    ethernets:
+      enp1s0:
+        dhcp4: true
+
+  identity:
+    username: javi
+    hostname: hp-laptop
+    password: '4affc8123ea78b13cc238a51e4ad64eaa6558f60e27c310d0bfed5bfdeb301bc73136807bd63b3a19d5fed75cf23f0fa4817f2b68c5fc8cd3236317afd041a4d'
+
+  ssh:
+    install-server: true
+    allow-pw: true
+    authorized-keys: []
+
+  packages:
+    - git
+    - python3-pip
+
+  shutdown: reboot
+
+  storage:
+    swap:
+      size: 16G
+    config:
+      - type: disk
+        id: disk0
+        match:
+          size: largest
+        ptable: gpt
+        wipe: superblock-recursive
+        grub_device: true
+
+      # EFI Partition
+      - type: partition
+        id: boot
+        device: disk0
+        size: 1G
+        flag: boot
+
+      - type: format
+        volume: boot
+        fstype: fat32
+      
+      - type: mount
+        device: boot
+        path: /boot/efi
+      
+      # Root Partition
+      - type: partition
+        id: root
+        device: disk0
+        size: -1
+
+      - type: format
+        volume: root
+        fstype: ext4
+      
+      - type: mount
+        device: root
+        path: /
+
+

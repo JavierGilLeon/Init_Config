@@ -154,21 +154,24 @@ grub-mkconfig -o /boot/grub/grub.cfg
 HOME="/home/$user_id"
 git clone https://github.com/JavierGilLeon/Init_Config.git "\$HOME/init-conf"
 chown -R "$user_id:$user_id" "\$HOME/init-conf"
+chmod +x "\$HOME/init-conf/arch/post-install.sh"
+echo "\$HOME/init-conf/arch/post-install.sh" >> /home/$user_id/.bashrc
 
 # Install packages
-pacman -S --noconfirm \$(grep -v '^#' \$HOME/init-conf/pre-install-pkg.txt)
+pacman -S --noconfirm \$(grep -v '^#' \$HOME/init-conf/arch/pre-install-pkg.txt)
 
 # Enable systemd services
 systemctl enable NetworkManager
 systemctl enable sshd
 systemctl enable bluetooth
 
-# Install yay
+echo "--------------------------------------------------"
+echo "System Successfully Installed!! You may reboot now"
+echo "--------------------------------------------------"
 
-chmod +x "\$HOME/init-conf/post-install.sh"
-echo "\$HOME/init-conf/post-install.sh" >> /home/$user_id/.bashrc
 
 EOF
+
 
 
 

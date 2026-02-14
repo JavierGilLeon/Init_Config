@@ -2,6 +2,7 @@
 man
 cmake
 mesa
+fastfetch
 
 
 # Network
