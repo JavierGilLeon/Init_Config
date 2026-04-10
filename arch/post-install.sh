@@ -16,13 +16,22 @@ git clone --recursive https://github.com/hyprwm/Hyprland
 cd Hyprland
 make all && sudo make install
 
-sudo pacman -S --noconfirm dunst xdg-desktop-portal-hyprland hyprpolkitagent qt5-wayland qt6-wayland noto-fonts kitty waybar
+sudo pacman -S --noconfirm dunst xdg-desktop-portal-hyprland hyprpolkitagent qt5-wayland qt6-wayland noto-fonts kitty waybar hyprpaper wl-clipboard
 
-sudo systemctl --user enable --now hyprpolkitagent.service
+systemctl --user enable --now hyprpolkitagent.service
 
 
 # Install dolphin
-sudo pacman -S --noconfirm dolphin ark audiocd-kio baloo dolphin-plugins kio-admin kio-gdrive kompare konsole
+sudo pacman -S --noconfirm dolphin ark audiocd-kio baloo dolphin-plugins kio-admin kio-gdrive kompare konsole 
+
+# Install Brave
+yay -Sy brave-bin
+
+
+sudo pacman -S noconfirm neovim
+
+# Install sddm
+yay -Sy ssdm-git
 
 # Install nerd-font
 

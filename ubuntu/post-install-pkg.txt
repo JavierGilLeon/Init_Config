@@ -1,0 +1,18 @@
+
+openssh
+vlc
+make
+cmake
+
+# Fastfetch
+build-essential
+git
+pkg-config
+libltdl-dev
+libjpeg-dev
+libpng-dev
+libtiff-dev
+libgif-dev
+libfreetype6-dev
+liblcms2-dev
+libxml2-dev
